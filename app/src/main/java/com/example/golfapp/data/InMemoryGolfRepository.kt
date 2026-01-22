@@ -10,35 +10,35 @@ class InMemoryGolfRepository : GolfRepository {
     private val games = mutableListOf<Game>()
     private val gamePlayers = mutableMapOf<String, List<String>>()
 
-    override fun addPlayer(name: String): Player {
+    override suspend fun addPlayer(name: String): Player {
         val player = Player(name = name.trim())
         players.add(player)
         return player
     }
 
-    override fun removePlayer(playerId: String) {
+    override suspend fun removePlayer(playerId: String) {
         players.removeAll { it.id == playerId }
     }
 
-    override fun listPlayers(): List<Player> = players.toList()
+    override suspend fun listPlayers(): List<Player> = players.toList()
 
-    override fun createSeason(name: String): Season {
+    override suspend fun createSeason(name: String): Season {
         val season = Season(name = name.trim())
         seasons.add(season)
         return season
     }
 
-    override fun listSeasons(): List<Season> = seasons.toList()
+    override suspend fun listSeasons(): List<Season> = seasons.toList()
 
-    override fun addLocation(seasonId: String, location: CourseLocation) {
+    override suspend fun addLocation(seasonId: String, location: CourseLocation) {
         val locations = locationsBySeason.getOrPut(seasonId) { mutableListOf() }
         locations.add(location)
     }
 
-    override fun listLocations(seasonId: String): List<CourseLocation> =
+    override suspend fun listLocations(seasonId: String): List<CourseLocation> =
         locationsBySeason[seasonId]?.toList().orEmpty()
 
-    override fun startGame(
+    override suspend fun startGame(
         seasonId: String,
         locationId: String,
         courseId: String,
@@ -57,7 +57,7 @@ class InMemoryGolfRepository : GolfRepository {
         return game
     }
 
-    override fun recordHoleResult(gameId: String, result: HoleResult): Game {
+    override suspend fun recordHoleResult(gameId: String, result: HoleResult): Game {
         val gameIndex = games.indexOfFirst { it.id == gameId }
         check(gameIndex >= 0) { "Game not found" }
         val game = games[gameIndex]
@@ -66,7 +66,7 @@ class InMemoryGolfRepository : GolfRepository {
         return updated
     }
 
-    override fun finishGame(gameId: String): Game {
+    override suspend fun finishGame(gameId: String): Game {
         val gameIndex = games.indexOfFirst { it.id == gameId }
         check(gameIndex >= 0) { "Game not found" }
         val game = games[gameIndex]
@@ -75,7 +75,7 @@ class InMemoryGolfRepository : GolfRepository {
         return updated
     }
 
-    override fun playerScorecards(playerId: String): List<PlayerScorecard> {
+    override suspend fun playerScorecards(playerId: String): List<PlayerScorecard> {
         return games.mapNotNull { game ->
             val playersInGame = gamePlayers[game.id].orEmpty()
             if (playerId !in playersInGame) {
@@ -94,7 +94,7 @@ class InMemoryGolfRepository : GolfRepository {
         }
     }
 
-    override fun seasonStandings(seasonId: String): List<SeasonStanding> {
+    override suspend fun seasonStandings(seasonId: String): List<SeasonStanding> {
         val seasonGames = games.filter { it.seasonId == seasonId }
         val playersInSeason = seasonGames.flatMap { gamePlayers[it.id].orEmpty() }.distinct()
         return playersInSeason.map { playerId ->
@@ -104,7 +104,7 @@ class InMemoryGolfRepository : GolfRepository {
         }.sortedByDescending { it.score }
     }
 
-    override fun courseRankings(courseId: String): List<PlayerScorecard> {
+    override suspend fun courseRankings(courseId: String): List<PlayerScorecard> {
         return games.filter { it.courseId == courseId }.flatMap { game ->
             val courseName = findCourseName(courseId)
             gamePlayers[game.id].orEmpty().map { playerId ->
@@ -119,7 +119,7 @@ class InMemoryGolfRepository : GolfRepository {
         }.sortedByDescending { it.score }
     }
 
-    override fun exportSeasonStatsCsv(seasonId: String, date: LocalDate): String {
+    override suspend fun exportSeasonStatsCsv(seasonId: String, date: LocalDate): String {
         val standings = seasonStandings(seasonId)
         val header = "Season,Player,Score,HoleInOnes,ExportedOn"
         val rows = standings.joinToString("\n") { standing ->
