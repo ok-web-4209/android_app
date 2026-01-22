@@ -3,17 +3,17 @@ package com.example.golfapp.data
 import java.time.LocalDate
 
 interface GolfRepository {
-    fun addPlayer(name: String): Player
-    fun removePlayer(playerId: String)
-    fun listPlayers(): List<Player>
+    suspend fun addPlayer(name: String): Player
+    suspend fun removePlayer(playerId: String)
+    suspend fun listPlayers(): List<Player>
 
-    fun createSeason(name: String): Season
-    fun listSeasons(): List<Season>
+    suspend fun createSeason(name: String): Season
+    suspend fun listSeasons(): List<Season>
 
-    fun addLocation(seasonId: String, location: CourseLocation)
-    fun listLocations(seasonId: String): List<CourseLocation>
+    suspend fun addLocation(seasonId: String, location: CourseLocation)
+    suspend fun listLocations(seasonId: String): List<CourseLocation>
 
-    fun startGame(
+    suspend fun startGame(
         seasonId: String,
         locationId: String,
         courseId: String,
@@ -21,12 +21,12 @@ interface GolfRepository {
         playerIds: List<String>,
     ): Game
 
-    fun recordHoleResult(gameId: String, result: HoleResult): Game
-    fun finishGame(gameId: String): Game
+    suspend fun recordHoleResult(gameId: String, result: HoleResult): Game
+    suspend fun finishGame(gameId: String): Game
 
-    fun playerScorecards(playerId: String): List<PlayerScorecard>
-    fun seasonStandings(seasonId: String): List<SeasonStanding>
-    fun courseRankings(courseId: String): List<PlayerScorecard>
+    suspend fun playerScorecards(playerId: String): List<PlayerScorecard>
+    suspend fun seasonStandings(seasonId: String): List<SeasonStanding>
+    suspend fun courseRankings(courseId: String): List<PlayerScorecard>
 
-    fun exportSeasonStatsCsv(seasonId: String, date: LocalDate = LocalDate.now()): String
+    suspend fun exportSeasonStatsCsv(seasonId: String, date: LocalDate = LocalDate.now()): String
 }
